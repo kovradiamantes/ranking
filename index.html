@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kovra — Panel de Revendedor</title>
+  <style>
+    /* Reset y tipografía */
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif}
+    html,body{height:100%}
+    body{
+      min-height:100vh;
+      color:#fff;
+      background: #121212;
+      background-attachment: fixed; /* fondo fijo */
+      overflow-y:auto;
+    }
+
+    
+
+    /* CONTENEDOR PRINCIPAL */
+    .container{
+      position:relative;
+      z-index:10;
+      max-width:1100px;
+      margin: 0 auto;
+      padding: 26px 20px 80px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:18px;
+      min-height:100vh;
+    }
+
+    /* INTRO OVERLAY (pantalla completa) */
+    .intro-overlay{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(2px);
+      pointer-events:auto;
+    }
+    .intro-center{
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      align-items:center;
+      justify-content:center;
+      max-width:92%;
+    }
+    .intro-logo {
+      width:220px;
+      height:220px;
+      object-fit:contain;
+      opacity:0;
+      transform:scale(.6);
+      border-radius:14px;
+      will-change:opacity,transform;
+      filter: drop-shadow(0 14px 36px rgba(0,0,0,0.6));
+    }
+    .intro-flyer {
+      width:720px;
+      max-width:92%;
+      height:auto;
+      opacity:0;
+      transform:translateY(12px);
+      border-radius:10px;
+      will-change:opacity,transform;
+      filter: drop-shadow(0 18px 44px rgba(0,0,0,0.6));
+    }
+    .intro-welcome{
+      color:#fff;
+      text-align:center;
+      opacity:0;
+      transform:translateY(8px);
+    }
+    .intro-welcome h2{
+      font-size:2.4rem;
+      color:#FFFF00;
+      letter-spacing:1px;
+    }
+    .intro-welcome p{
+      color:#ddd;
+      margin-top:6px;
+      font-size:1rem;
+    }
+
+    /* MENU FIJO arriba (logo pequeño + titulo + botones) */
+    header.topbar {
+      position:sticky;
+      top:0px;
+      z-index:50;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      padding:6px 12px;
+      width:100%;
+      max-width:1200px;
+      margin:0 auto 12px;
+      pointer-events:auto;
+      backdrop-filter: none;
+      background: #121212;
+    }
+    .topbar-row{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    .topbar-logo{
+      width:64px;
+      height:auto;
+      border-radius:10px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.5);
+    }
+    .topbar-title{
+      font-size:1.25rem;
+      color:#FFFF00;
+      font-weight:800;
+      letter-spacing:0.6px;
+    }
+
+    .menu-buttons {
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      margin-top:6px;
+      flex-wrap:wrap;
+      margin-bottom: 6px;
+    }
+    .btn {
+      background:linear-gradient(90deg,#0f0f0f,#111);
+      border: 2px solid #FFFF00;
+      padding:12px 18px;
+      border-radius:12px;
+      font-weight:700;
+      letter-spacing:.6px;
+      cursor:pointer;
+      color:#fff;
+      min-width:200px;
+      text-align:center;
+      box-shadow:0 6px 20px rgba(0,0,0,0.4);
+      transition:transform .14s ease,opacity .14s ease;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn.secondary{background:linear-gradient(90deg,#151515,#0d0d0d)}
+
+    /* ZONA DINÁMICA (debajo del menu) */
+    .content-area{
+      width:100%;
+      max-width:1100px;
+      margin-top:8px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      align-items:center;
+      padding:6px;
+    }
+
+    /* Tablas: mismo estilo visual del original */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      text-align:left;
+      background:transparent;
+    }
+    thead{background:linear-gradient(90deg,#C20000,#FF1900)}
+    th{padding:14px;font-weight:600;text-transform:uppercase;font-size:.9rem;letter-spacing:.5px}
+    tbody tr{border-bottom:1px solid rgba(255,255,255,0.08);transition:background .25s}
+    tbody tr:hover{background:rgba(255,255,255,0.06)}
+    td{padding:12px;font-size:.95rem}
+    .pos{text-align:center;font-weight:700;color:#00ff88}
+
+    /* Estilos para secciones que se muestran/ocultan */
+    .panel{
+      width:100%;
+      display:none;
+      opacity:0;
+      transform:translateY(8px);
+      transition:opacity .36s ease, transform .36s ease;
+    }
+    .panel.show{
+      display:block;
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    /* Gallery thumbs */
+    .gallery{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .gallery img.thumb{
+      width:260px;
+      height:150px;
+      object-fit:cover;
+      border-radius:8px;
+      cursor:pointer;
+      border:2px solid rgba(255,255,255,0.04);
+      transition:transform .12s ease;
+    }
+    .gallery img.thumb:active{transform:scale(.98)}
+
+    /* Modal imagen */
+    .img-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.85);
+      z-index:9999;
+      padding:20px;
+    }
+    .img-modal.show{display:flex}
+    .img-box{
+      max-width:1100px;
+      width:100%;
+      max-height:92vh;
+      position:relative;
+    }
+    .img-box img.full{
+      width:100%;
+      height:auto;
+      border-radius:10px;
+      display:block;
+    }
+    .close-x{
+      position:absolute;
+      top:-12px;
+      right:-12px;
+      background:#111;
+      border:2px solid rgba(255,255,255,0.08);
+      color:#fff;
+      width:44px;
+      height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      cursor:pointer;
+      font-weight:700;
+      box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    /* Responsive */
+    @media (max-width:900px){
+      .intro-logo{width:180px;height:180px}
+      .intro-flyer{width:420px}
+      .gallery img.thumb{width:44vw;height:26vw}
+      .btn{min-width:150px}
+    }
+    @media (max-width:600px){
+      .intro-welcome h2{font-size:1.6rem}
+      .topbar-title{font-size:1rem}
+      .menu-buttons{gap:8px}
+      .btn{min-width:120px;padding:10px 12px;font-size:.92rem}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Light sweep overlay -->
+  <div class="light-sweep" aria-hidden="true"></div>
+
+  <!-- INTRO SEQUENCE (cubre todo hasta terminar) -->
+  <div class="intro-overlay" id="introOverlay" role="region" aria-label="Intro">
+    <div class="intro-center">
+      <img id="introLogo" class="intro-logo" src="" alt="Logo Kovra (inicio)" />
+      <img id="introFlyer" class="intro-flyer" src="" alt="Comprador del mes" style="display:none" />
+      <div class="intro-welcome" id="introWelcome" style="display:none">
+        <h2 id="welcomeTitle">Bienvenidos a Kovra</h2>
+        <p id="welcomeSubtitle">tu proveedor de diamantes favorito</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="container" id="app">
+
+    <!-- HEADER / MENU (oculto hasta que termine intro) -->
+    <header class="topbar" id="topbar" style="display:none;">
+      <div class="topbar-row">
+        <img id="smallLogo" class="topbar-logo" src="" alt="Logo Kovra" />
+        <div class="topbar-title">Kovra — Panel de Revendedor</div>
+      </div>
+
+      <div class="menu-buttons" role="toolbar" aria-label="Menú principal">
+        <button class="btn" id="btnTickets">Ranking de Tickets</button>
+        <button class="btn secondary" id="btnCompradores">Ranking de Compradores</button>
+        <button class="btn" id="btnPromos">Ver precios y promociones</button>
+      </div>
+    </header>
+
+    <!-- AREA DINÁMICA -->
+    <main class="content-area" id="contentArea" aria-live="polite">
+      <!-- por defecto vacío, se llenará según botón -->
+      <div id="panelTickets" class="panel" aria-hidden="true">
+        <table id="tablaTickets">
+          <thead>
+            <tr><th>Posición</th><th>ID</th><th>Nombre</th><th>Total Tickets</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div id="panelCompradores" class="panel" aria-hidden="true">
+        <table id="tablaDiamantes">
+          <thead>
+            <tr><th>Posición</th><th>ID</th><th>Nombre</th><th>Total Diamantes</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div id="panelPromos" class="panel" aria-hidden="true">
+        <div class="gallery" id="gallery"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL IMAGEN -->
+  <div id="imgModal" class="img-modal" role="dialog" aria-hidden="true">
+    <div class="img-box">
+      <button class="close-x" id="closeImgModal" aria-label="Cerrar imagen">X</button>
+      <img id="modalImg" class="full" src="" alt="Flyer grande" />
+    </div>
+  </div>
+
+  <script>
+    /**********************
+     * CONFIGURACIÓN IMÁGENES (reemplaza por tus URLs)
+     **********************/
+    const logoUrl = "https://upload.wikimedia.org/wikipedia/commons/6/6b/Crystal_Clear_app_diamond.png"; // reemplaza
+    const buyerFlyerUrl = "https://via.placeholder.com/1200x700?text=Comprador+del+Mes"; // reemplaza
+    const flyers = [
+      { id:1, thumb:"https://via.placeholder.com/800x480?text=Promo+1", full:"https://via.placeholder.com/1400x900?text=Promo+1" },
+      { id:2, thumb:"https://via.placeholder.com/800x480?text=Promo+2", full:"https://via.placeholder.com/1400x900?text=Promo+2" },
+      { id:3, thumb:"https://via.placeholder.com/800x480?text=Promo+3", full:"https://via.placeholder.com/1400x900?text=Promo+3" },
+    ];
+
+    // asignar imágenes a elementos
+    document.getElementById('introLogo').src = logoUrl;
+    document.getElementById('smallLogo').src = logoUrl;
+    document.getElementById('introFlyer').src = buyerFlyerUrl;
+
+    /**********************
+     * DATOS: Tickets (usa tu arreglo original)
+     **********************/
+    const compradoresTickets = [
+      { id: 5405416, nombre: "⚕️M҉a̼⍣R҉ɨN҉o͛Ø🥀", tickets: 19 },
+      { id: 11233254, nombre: "⪻✰♛Ɱเɠµεℓ♛✰⪼", tickets: 13 },
+      { id: 12385712, nombre: "Hafid'OjiithoOs💕", tickets: 7 },
+      { id: 22796518, nombre: "𓆰͜͡🝡OjiiThoOs💕", tickets: 7 },
+      { id: 15064670, nombre: "GΛƬӨ", tickets: 6 },
+      { id: 18712178, nombre: "BLACK.DRAGON.", tickets: 5 },
+      { id: 6761817, nombre: "ஜ⃝🦁 ℘ąƈɧɛ ꋬꍌ ꒒ꏂóꋊ", tickets: 3 },
+      { id: 22417457, nombre: "🪐ᛕᗴᐯᎥᑎ ᗪ’ᗪᗴᔕᎥ🖤", tickets: 3 },
+      { id: 26609813, nombre: "👻🤠 Mi ca 🤠👻", tickets: 2 },
+      { id: 22445054, nombre: "Romeo ✨", tickets: 2 },
+      { id: 10417672, nombre: "Rafhael T. 🦍", tickets: 2 },
+      { id: 16580788, nombre: "Diego. 🐝🖤", tickets: 1 },
+      { id: 21270177, nombre: "ANDO LIMPIO 🚶", tickets: 1 },
+      { id: 5483761, nombre: "₳Đ༗ Miqui🦉", tickets: 1 },
+      { id: 8590373, nombre: "Señor Vanidoso", tickets: 1 },
+      { id: 2536637, nombre: "★ P乇NNㄚ山ｉ丂乇 ★", tickets: 1 },
+      { id: 6391517, nombre: "🆘️BuscoSugarBb🆘️", tickets: 0 },
+      { id: 23871061, nombre: "梁𓃬12.2kLuis21🖤", tickets: 0 },
+      { id: 20059099, nombre: "𝓚𝓪𝓲𝓼𝓮𝓻™ 👑", tickets: 0 },
+      { id: 11689764, nombre: "Lamine Yamal.", tickets: 0 },
+      { id: 19304644, nombre: "☣🍀уσѕнι∂αн🐻‍❄️☢", tickets: 0 },
+      { id: 24560138, nombre: "𓆩𝕯𓆪 Jade 🎋", tickets: 0 },
+    ];
+
+    compradoresTickets.sort((a,b)=>b.tickets-a.tickets);
+
+    /**********************
+     * DATOS: Ranking Diamantes (Octubre)
+     **********************/
+    const rankingDiamantes = [
+      {pos:1,id:5405416,nombre:"⚕️M҉a̼⍣R҉ɨN҉o͛Ø🥀",diamantes:17230},
+      {pos:2,id:11233254,nombre:"⪻✰♛Ɱเɠµεℓ♛✰⪼",diamantes:10660},
+      {pos:3,id:12385712,nombre:"Hafid'OjiithoOs💕",diamantes:8838},
+      {pos:4,id:22445054,nombre:"Romeo ✨",diamantes:5936},
+      {pos:5,id:22796518,nombre:"𓆰͜͡🝡OjiiThoOs💕",diamantes:5740},
+      {pos:6,id:15064670,nombre:"GΛƬӨ",diamantes:5340},
+      {pos:7,id:18712178,nombre:"BLACK.DRAGON.",diamantes:4100},
+      {pos:8,id:6761817,nombre:"ஜ⃝🦁 ℘ąƈɧɛ ꋬꍌ ꒒ꏂóꋊ",diamantes:3663},
+      {pos:9,id:22417457,nombre:"🪐ᛕᗴᐯᎥᑎ ᗪ’ᗪᗴᔕᎥ🖤",diamantes:3280},
+      {pos:10,id:21270177,nombre:"ANDO LIMPIO 🚶",diamantes:3050},
+      {pos:11,id:26609813,nombre:"👻🤠 Mi ca 🤠👻",diamantes:2136},
+      {pos:12,id:16580788,nombre:"Diego. 🐝🖤",diamantes:1722},
+      {pos:13,id:10417672,nombre:"Rafhael T. 🦍",diamantes:1640},
+      {pos:14,id:5483761,nombre:"₳Đ༗ Miqui🦉",diamantes:1230},
+      {pos:15,id:8590373,nombre:"Señor Vanidoso",diamantes:820},
+      {pos:16,id:2536637,nombre:"★ P乇NNㄚ山ｉ丂乇 ★",diamantes:820},
+      {pos:17,id:19304644,nombre:"☣🍀уσѕнι∂αн🐻‍❄️☢",diamantes:574},
+      {pos:18,id:23871061,nombre:"梁𓃬12.2kLuis21🖤",diamantes:574},
+      {pos:19,id:24560138,nombre:"𓆩𝕯𓆪 Jade 🎋",diamantes:410},
+      {pos:20,id:6391517,nombre:"🆘️BuscoSugarBb🆘️",diamantes:164},
+      {pos:21,id:11689764,nombre:"Lamine Yamal.",diamantes:164},
+      {pos:22,id:20059099,nombre:"𝓚𝓪𝓲𝓼𝓮𝓻™ 👑",diamantes:164},
+    ];
+
+    /**********************
+     * RENDER TABLAS y GALERÍA
+     **********************/
+    function renderTickets(){
+      const tbody = document.querySelector("#tablaTickets tbody");
+      tbody.innerHTML = "";
+      compradoresTickets.forEach((c,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="pos">#${i+1}</td>
+          <td>${c.id}</td>
+          <td>${c.nombre}</td>
+          <td>${c.tickets}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderDiamantes(){
+      const tbody = document.querySelector("#tablaDiamantes tbody");
+      tbody.innerHTML = "";
+      rankingDiamantes.forEach((r)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="pos">#${r.pos}</td>
+          <td>${r.id}</td>
+          <td>${r.nombre}</td>
+          <td>${r.diamantes.toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderGallery(){
+      const g = document.getElementById('gallery');
+      g.innerHTML = "";
+      flyers.forEach(f=>{
+        const img = document.createElement('img');
+        img.className = "thumb";
+        img.src = f.thumb;
+        img.alt = "Flyer " + f.id;
+        img.dataset.full = f.full;
+        img.addEventListener('click', ()=> openModal(f.full));
+        g.appendChild(img);
+      });
+    }
+
+    /**********************
+     * MODAL IMAGEN
+     **********************/
+    const imgModal = document.getElementById('imgModal');
+    const modalImg = document.getElementById('modalImg');
+    const closeImgModalBtn = document.getElementById('closeImgModal');
+
+    function openModal(url){
+      modalImg.src = url;
+      imgModal.classList.add('show');
+      imgModal.setAttribute('aria-hidden','false');
+    }
+    function closeModal(){
+      imgModal.classList.remove('show');
+      imgModal.setAttribute('aria-hidden','true');
+      modalImg.src = "";
+    }
+    closeImgModalBtn.addEventListener('click', closeModal);
+    imgModal.addEventListener('click', (e)=> { if(e.target === imgModal) closeModal(); });
+
+    /**********************
+     * NAVEGACIÓN BOTONES (muestra una sola sección cada vez)
+     **********************/
+    const panelTickets = document.getElementById('panelTickets');
+    const panelCompradores = document.getElementById('panelCompradores');
+    const panelPromos = document.getElementById('panelPromos');
+
+    function hideAllPanels(){
+      [panelTickets,panelCompradores,panelPromos].forEach(p=>{
+        p.classList.remove('show');
+        p.setAttribute('aria-hidden','true');
+        // setTimeout para display none no necesario; .show controla visibilidad
+      });
+    }
+
+    document.getElementById('btnTickets').addEventListener('click', ()=>{
+      renderTickets();
+      hideAllPanels();
+      // allow small delay for fade out
+      setTimeout(()=>{ panelTickets.classList.add('show'); panelTickets.setAttribute('aria-hidden','false'); }, 40);
+      window.scrollTo({top: document.body.scrollTop + 120, behavior: 'smooth'});
+    });
+
+    document.getElementById('btnCompradores').addEventListener('click', ()=>{
+      renderDiamantes();
+      hideAllPanels();
+      setTimeout(()=>{ panelCompradores.classList.add('show'); panelCompradores.setAttribute('aria-hidden','false'); }, 40);
+      window.scrollTo({top: document.body.scrollTop + 120, behavior: 'smooth'});
+    });
+
+    document.getElementById('btnPromos').addEventListener('click', ()=>{
+      renderGallery();
+      hideAllPanels();
+      setTimeout(()=>{ panelPromos.classList.add('show'); panelPromos.setAttribute('aria-hidden','false'); }, 40);
+      window.scrollTo({top: document.body.scrollTop + 120, behavior: 'smooth'});
+    });
+
+    /**********************
+     * SECUENCIA INICIAL (control estricto)
+     * flujo: logo (3s) -> flyer (5s) -> welcome (3s) -> mostrar topbar y menu (permanente)
+     **********************/
+    const introOverlay = document.getElementById('introOverlay');
+    const introLogo = document.getElementById('introLogo');
+    const introFlyer = document.getElementById('introFlyer');
+    const introWelcome = document.getElementById('introWelcome');
+    const topbar = document.getElementById('topbar');
+
+    function fadeIn(el, ms=400, display='block'){
+      el.style.display = display;
+      el.style.opacity = 0;
+      el.style.transform = 'translateY(8px)';
+      requestAnimationFrame(()=> {
+        el.style.transition = `opacity ${ms}ms ease, transform ${ms}ms ease`;
+        el.style.opacity = 1;
+        el.style.transform = 'translateY(0)';
+      });
+    }
+    function fadeOut(el, ms=360){
+      el.style.transition = `opacity ${ms}ms ease, transform ${ms}ms ease`;
+      el.style.opacity = 0;
+      el.style.transform = 'translateY(6px)';
+      setTimeout(()=>{ el.style.display = 'none'; }, ms + 20);
+    }
+
+    function runIntroSequence(){
+      // asegurar estados iniciales
+      introLogo.style.opacity = 0;
+      introLogo.style.transform = 'scale(.6)';
+      introLogo.style.display = 'block';
+      introFlyer.style.display = 'none';
+      introWelcome.style.display = 'none';
+      topbar.style.display = 'none';
+
+      // 1) logo: anim zoom + fade (3s visible)
+      // aplicamos transform + transition manual para zoom effect
+      introLogo.style.transition = 'transform 1200ms cubic-bezier(.2,.9,.2,1), opacity 700ms ease';
+      requestAnimationFrame(()=> {
+        introLogo.style.opacity = 1;
+        introLogo.style.transform = 'scale(1)';
+      });
+
+      // esperar 3s para pasar al flyer
+      setTimeout(()=>{
+        // fade out logo
+        introLogo.style.transition = 'opacity 500ms ease, transform 500ms ease';
+        introLogo.style.opacity = 0;
+        introLogo.style.transform = 'scale(.96)';
+        setTimeout(()=>{ introLogo.style.display = 'none'; }, 520);
+
+        // mostrar flyer (fade in)
+        setTimeout(()=> {
+          introFlyer.style.display = 'block';
+          introFlyer.style.opacity = 0;
+          introFlyer.style.transform = 'translateY(12px)';
+          requestAnimationFrame(()=> {
+            introFlyer.style.transition = 'opacity 600ms ease, transform 600ms ease';
+            introFlyer.style.opacity = 1;
+            introFlyer.style.transform = 'translateY(0)';
+          });
+        }, 540);
+
+        // esperar 5s con flyer visible
+        setTimeout(()=>{
+          // fade out flyer
+          introFlyer.style.transition = 'opacity 500ms ease, transform 500ms ease';
+          introFlyer.style.opacity = 0;
+          introFlyer.style.transform = 'translateY(8px)';
+          setTimeout(()=>{ introFlyer.style.display = 'none'; }, 520);
+
+          // mostrar welcome
+          setTimeout(()=>{
+            introWelcome.style.display = 'block';
+            introWelcome.style.opacity = 0;
+            introWelcome.style.transform = 'translateY(10px)';
+            requestAnimationFrame(()=> {
+              introWelcome.style.transition = 'opacity 600ms ease, transform 600ms ease';
+              introWelcome.style.opacity = 1;
+              introWelcome.style.transform = 'translateY(0)';
+            });
+
+            // mantener 3s la bienvenida
+            setTimeout(()=>{
+              // fade out welcome
+              introWelcome.style.transition = 'opacity 500ms ease, transform 500ms ease';
+              introWelcome.style.opacity = 0;
+              introWelcome.style.transform = 'translateY(8px)';
+              setTimeout(()=>{
+                introWelcome.style.display = 'none';
+                // esconder overlay y mostrar topbar/menu
+                introOverlay.style.display = 'none';
+                introOverlay.setAttribute('aria-hidden','true');
+                // mostrar topbar (menu) fijo
+                topbar.style.display = 'flex';
+                // aseguramos que el topbar aparezca con fade
+                topbar.style.opacity = 0;
+                topbar.style.transform = 'translateY(-6px)';
+                requestAnimationFrame(()=>{
+                  topbar.style.transition = 'opacity 500ms ease, transform 500ms ease';
+                  topbar.style.opacity = 1;
+                  topbar.style.transform = 'translateY(0)';
+                });
+              },520);
+            }, 3000); // 3s welcome
+          }, 540);
+        }, 5000); // 5s flyer
+      }, 3000); // 3s logo
+    }
+
+    // ejecutar al cargar
+    window.addEventListener('load', ()=>{
+      // inicializar estados de paneles
+      hideAllPanels();
+      // iniciar secuencia
+      runIntroSequence();
+      // precarga: renderizar tablas y galería para respuesta rápida
+      renderTickets();
+      renderDiamantes();
+      renderGallery();
+    });
+
+  </script>
+</body>
+</html>
