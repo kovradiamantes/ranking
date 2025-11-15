@@ -341,7 +341,26 @@
       .podio{flex-direction:column;align-items:stretch;}
       .podio-card{width:100%;}
     }
+
+
+
+
+    .btn-login-top {
+    background: #e23c3c;
+    padding: 8px 14px;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+	}
 	
+	.btn-login-top:hover {
+	    background: #c83232;
+	}
+
+
+	  
 
 
 
@@ -376,6 +395,7 @@
       <div class="topbar-row">
         <img id="smallLogo" class="topbar-logo" src="" alt="Logo Kovra" />
         <div class="topbar-title">Kovra — Panel de Comprador</div>
+		<button id="btnLoginTop" class="btn-login-top">Iniciar Sesión</button>
       </div>
 
 
@@ -385,6 +405,7 @@
         <button class="btn" id="btnTickets">Ranking de Tickets</button>
         <button class="btn secondary" id="btnCompradores">Ranking de Compradores</button>
         <button class="btn" id="btnPromos">Precios y Promociones</button>
+		<button id="btnJuegos"> 🎮 Juegos </button>
 		<button class="btn" id="btnGanadores">Ganadores de Concursos</button>
       </div>
     </header>
@@ -844,9 +865,58 @@
     });
 
 
+	// ejecutar condición de loggin
+    document.getElementById("btnLoginTop").addEventListener("click", () => {
+    if (isLogged()) {
+        loadPanel(); // o perfil del usuario
+    } else {
+        loadLogin();
+    }
+	});
+
+    // cambia el estado del login
+	if (isLogged()) {
+    document.getElementById("btnLoginTop").textContent = "Mi Cuenta";
+	} 
+
+
+
+
+	// cargamos bloque de juegos
+
+	document.getElementById("btnJuegos")?.addEventListener("click", () => {
+
+    if (!isLogged()) {
+        const confirmLogin = confirm("Debes iniciar sesión para jugar. ¿Quieres iniciar sesión ahora?");
+        if (confirmLogin) {
+            loadLogin();
+        }
+        return;
+    }
+
+    // Si está logeado → cargar juegos
+    loadGames();
+	});
+
+
+   // función que muestra los juegos
+   function loadGames() {
+	    document.getElementById("contentArea").innerHTML = `
+	        <div class="panel show">
+	            <h2>🎮 Juegos disponibles</h2>
+	            <p>Selecciona un juego para comenzar.</p>
+	
+	            <button class="btn">Ruleta</button>
+	            <button class="btn">Rasca y Gana</button>
+	            <button class="btn">Dados</button>
+	        </div>
+	    `;
+	}
+	  
   </script>
 </body>
 </html>
+
 
 
 
