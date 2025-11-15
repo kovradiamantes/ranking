@@ -2,76 +2,82 @@
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwCpLwlPPpiIWhYfL7_YuQqnSdRd4t2gPUtlc_w2VfptlL5iHdgBK0ZVH94knegfzDj/exec";
 
-// Hash simple usando SubtleCrypto (SHA-256)
+// HASH SHA-256
 async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-  return hashHex;
+  const enc = new TextEncoder();
+  const buffer = await crypto.subtle.digest("SHA-256", enc.encode(password));
+  return [...new Uint8Array(buffer)]
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
-// Registro
-async function register(id, password) {
-  const pwHash = await hashPassword(password);
-  const body = {
-    action: "register",
-    id: id,
-    password: pwHash
-  };
+// =======================
+//  REGISTER
+// =======================
+async function registerUser(id, password) {
+  const hash = await hashPassword(password);
 
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      action: "register",
+      id,
+      password: hash
+    })
   });
-  const data = await res.json();
-  return data; // { ok: true } o { ok: false, msg: "ID ya registrado" }
+
+  return res.json();
 }
 
-// Login
-async function login(id, password) {
-  const pwHash = await hashPassword(password);
-  const body = {
-    action: "login",
-    id: id,
-    password: pwHash
-  };
+// =======================
+//  LOGIN
+// =======================
+async function loginUser(id, password) {
+  const hash = await hashPassword(password);
 
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      action: "login",
+      id,
+      password: hash
+    })
   });
+
   const data = await res.json();
+
   if (data.ok) {
-    // guardamos sesión
-    localStorage.setItem("buzzcast_id", id);
+    localStorage.setItem("buzz_id", id);
   }
+
   return data;
 }
 
-// Logout
+// =======================
+//  LOGOUT
+// =======================
 function logout() {
-  localStorage.removeItem("buzzcast_id");
+  localStorage.removeItem("buzz_id");
 }
 
-// Obtener datos del usuario (puntos, nombre, etc)
-async function getUserData() {
-  const id = localStorage.getItem("buzzcast_id");
+// =======================
+//  OBTENER USUARIO
+// =======================
+async function getUser() {
+  const id = localStorage.getItem("buzz_id");
   if (!id) return null;
 
-  const body = { action: "getUser", id: id };
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      action: "getUser",
+      id
+    })
   });
+
   const data = await res.json();
-  if (data.ok) {
-    return data; // { ok: true, id, nombre, puntos }
-  } else {
-    return null;
-  }
+  return data.ok ? data : null;
 }
