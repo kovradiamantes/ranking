@@ -1,83 +1,106 @@
-// auth.js
-
+// ===============================
+//  CONFIGURACIÓN
+// ===============================
 const API_URL = "https://script.google.com/macros/s/AKfycbwCpLwlPPpiIWhYfL7_YuQqnSdRd4t2gPUtlc_w2VfptlL5iHdgBK0ZVH94knegfzDj/exec";
 
-// HASH SHA-256
+
+// ===============================
+//  HASH DE CONTRASEÑA (SHA-256)
+// ===============================
 async function hashPassword(password) {
-  const enc = new TextEncoder();
-  const buffer = await crypto.subtle.digest("SHA-256", enc.encode(password));
-  return [...new Uint8Array(buffer)]
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-// =======================
-//  REGISTER
-// =======================
-async function registerUser(id, password) {
-  const hash = await hashPassword(password);
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "register",
-      id,
-      password: hash
-    })
-  });
+// ===============================
+//  REGISTRO DE USUARIO
+// ===============================
+async function registerUser(id, nombre, password) {
+    const pwHash = await hashPassword(password);
 
-  return res.json();
+    const body = {
+        action: "register",
+        id: id,
+        nombre: nombre,
+        password: pwHash
+    };
+
+    const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    return await res.json(); 
 }
 
-// =======================
+
+// ===============================
 //  LOGIN
-// =======================
+// ===============================
 async function loginUser(id, password) {
-  const hash = await hashPassword(password);
+    const pwHash = await hashPassword(password);
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "login",
-      id,
-      password: hash
-    })
-  });
+    const body = {
+        action: "login",
+        id: id,
+        password: pwHash
+    };
 
-  const data = await res.json();
+    const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
 
-  if (data.ok) {
-    localStorage.setItem("buzz_id", id);
-  }
+    const data = await res.json();
 
-  return data;
+    if (data.ok) {
+        // guardar sesión en el navegador
+        localStorage.setItem("buzz_user", id);
+    }
+
+    return data;
 }
 
-// =======================
-//  LOGOUT
-// =======================
-function logout() {
-  localStorage.removeItem("buzz_id");
+
+// ===============================
+//  CERRAR SESIÓN
+// ===============================
+function logoutUser() {
+    localStorage.removeItem("buzz_user");
 }
 
-// =======================
-//  OBTENER USUARIO
-// =======================
-async function getUser() {
-  const id = localStorage.getItem("buzz_id");
-  if (!id) return null;
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "getUser",
-      id
-    })
-  });
+// ===============================
+//  OBTENER DATOS DEL USUARIO
+// ===============================
+async function getUserData() {
+    const id = localStorage.getItem("buzz_user");
+    if (!id) return null;
 
-  const data = await res.json();
-  return data.ok ? data : null;
+    const body = {
+        action: "getUser",
+        id: id
+    };
+
+    const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+
+    return await res.json();  // { ok:true, user:{...} }
+}
+
+
+// ===============================
+//  VERIFICAR SESIÓN ACTIVA
+// ===============================
+function isLogged() {
+    return localStorage.getItem("buzz_user") !== null;
 }
