@@ -456,6 +456,22 @@
     </div>
   </div>
 
+
+
+
+  <!-- MODAL DE LOGIN -->
+	<div id="modalAuth" class="modal hidden">
+		<div class="modal-content">
+			<h2>Acceso</h2>
+			<p>Por favor inicia sesión o regístrate para continuar.</p>
+			<button class="btn-login">Iniciar Sesión</button>
+			<button class="btn-register">Registrarse</button>
+			<span class="cerrar" id="cerrarModal">✖</span>
+		</div>
+	</div>
+
+	
+	
   <script>
     /**********************
      * CONFIGURACIÓN IMÁGENES (reemplaza por tus URLs)
@@ -912,10 +928,46 @@
 	        </div>
 	    `;
 	}
+
+
+
+
+
+  // FORMULARIO LOGIN
+	let userLogged = false;
+
+	const authBtn = document.getElementById('authBtn');
+	const modalAuth = document.getElementById('modalAuth');
+	const btnJuegos = document.getElementById('btnJuegos');
+	const cerrarModal = document.getElementById('cerrarModal');
+	
+	
+	// Abrir modal
+	authBtn.addEventListener('click', () => {
+	modalAuth.classList.remove('hidden');
+	});
+	
+	
+	// Cerrar modal
+	cerrarModal.addEventListener('click', () => {
+	modalAuth.classList.add('hidden');
+	});
+	
+	
+	// Lógica de Juegos
+	btnJuegos.addEventListener('click', () => {
+	if (!userLogged) {
+	modalAuth.classList.remove('hidden');
+	} else {
+	alert('Mostrando juegos (solo para usuarios registrados).');
+	}
+	});
+
 	  
   </script>
 </body>
 </html>
+
 
 
 
