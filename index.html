@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
   <meta charset="utf-8" />
@@ -987,22 +987,27 @@
       }
     }
 
-    // register -> envía id + nombre + hash
-    async function registerApi(id, nombre, passwordPlain) {
-      const pwHash = await hashPassword(passwordPlain);
-      const body = { action: "register", id: id.toString(), nombre: nombre || "", password: pwHash };
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        return data;
-      } catch (e) {
-        return { ok:false, msg: "Error de red" };
-      }
-    }
+    const PROXY = "https://cors.isomorphic-git.org/";
+	const API_URL = PROXY + "https://script.google.com/macros/s/AKfycbwgTIsTrcn35MKT-C2xcIEsT1Vwbj8O5ZnyQReLcRvXTyIyZGHYuBqRdOxfRx4cDlC6/exec";
+	
+	// register -> envía id + nombre + hash
+	async function registerApi(id, nombre, passwordPlain) {
+	  const pwHash = await hashPassword(passwordPlain);
+	  const body = { action: "register", id: id.toString(), nombre, password: pwHash };
+	
+	  try {
+	    const res = await fetch(API_URL, {
+	      method: "POST",
+	      headers: { "Content-Type": "application/json" },
+	      body: JSON.stringify(body)
+	    });
+	
+	    return await res.json();
+	
+	  } catch (e) {
+	    return { ok: false, msg: "Error de red" };
+	  }
+	}
 
     // getUserData -> trae info del usuario (puntos, nombre, etc)
     async function getUserData() {
@@ -1181,6 +1186,7 @@
 
 </body>
 </html>
+
 
 
 
