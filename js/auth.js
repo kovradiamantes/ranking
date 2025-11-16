@@ -19,23 +19,25 @@ async function hashPassword(password) {
 // ===============================
 //  REGISTRO DE USUARIO
 // ===============================
-async function registerUser(id, nombre, password) {
-    const pwHash = await hashPassword(password);
+// =======================
+// REGISTRO
+// =======================
+async function registerUser(data) {
+  const { id, nombre, password } = data; 
+  const sheet = getSheet();
+  const rows = sheet.getDataRange().getValues();
 
-    const body = {
-        action: "register",
-        id: id,
-        nombre: nombre,
-        password: pwHash
-    };
+  // ¿Existe ya?
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] == id) {
+      return json({ ok: false, msg: "ID ya registrado" });
+    }
+  }
 
-    const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
+  // Guardar nuevo usuario: ID, Nombre, Password, puntos, jugados, ganados, estado
+  sheet.appendRow([id, nombre, password, 0, 0, 0, "activo"]);
 
-    return await res.json(); 
+  return json({ ok: true });
 }
 
 
