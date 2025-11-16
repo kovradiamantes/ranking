@@ -943,7 +943,7 @@
        ========================= -->
   <script>
     // Tu Apps Script Web App URL (la que compartiste)
-    const API_URL = "https://script.google.com/macros/s/AKfycbwCpLwlPPpiIWhYfL7_YuQqnSdRd4t2gPUtlc_w2VfptlL5iHdgBK0ZVH94knegfzDj/exec";
+    // const API_URL = "https://script.google.com/macros/s/AKfycbwCpLwlPPpiIWhYfL7_YuQqnSdRd4t2gPUtlc_w2VfptlL5iHdgBK0ZVH94knegfzDj/exec";
 
     // Hash SHA-256 helper (SubtleCrypto)
     async function hashPassword(password) {
@@ -1075,7 +1075,7 @@
       const result = await loginApi(id, pass);
       if (result.ok) {
         localStorage.setItem("buzzcast_id", id.toString());
-        updateTopLoginButton();
+        //updateTopLoginButton();
         closeAuthModal();
         alert("Inicio de sesión correcto.");
       } else {
@@ -1093,7 +1093,7 @@
       const result = await registerApi(id, nombre, pass);
       if (result.ok) {
         localStorage.setItem("buzzcast_id", id.toString());
-        updateTopLoginButton();
+        // updateTopLoginButton();
         closeAuthModal();
         alert("Cuenta creada y sesión iniciada.");
       } else {
@@ -1181,6 +1181,7 @@
 
 </body>
 </html>
+
 
 
 
