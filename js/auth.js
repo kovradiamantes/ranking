@@ -17,27 +17,24 @@ async function hashPassword(password) {
 
 
 // ===============================
-//  REGISTRO DE USUARIO
+//  REGISTRO
 // ===============================
-// =======================
-// REGISTRO
-// =======================
-async function registerUser(data) {
-  const { id, nombre, password } = data; 
-  const sheet = getSheet();
-  const rows = sheet.getDataRange().getValues();
+async function registerUser(id, password) {
+    const pwHash = await hashPassword(password);
 
-  // ¿Existe ya?
-  for (let i = 1; i < rows.length; i++) {
-    if (rows[i][0] == id) {
-      return json({ ok: false, msg: "ID ya registrado" });
-    }
-  }
+    const body = {
+        action: "register",
+        id: id,
+        password: pwHash
+    };
 
-  // Guardar nuevo usuario: ID, Nombre, Password, puntos, jugados, ganados, estado
-  sheet.appendRow([id, nombre, password, 0, 0, 0, "activo"]);
+    const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
 
-  return json({ ok: true });
+    return await res.json();
 }
 
 
@@ -62,7 +59,6 @@ async function loginUser(id, password) {
     const data = await res.json();
 
     if (data.ok) {
-        // guardar sesión en el navegador
         localStorage.setItem("buzz_user", id);
     }
 
@@ -96,7 +92,7 @@ async function getUserData() {
         body: JSON.stringify(body)
     });
 
-    return await res.json();  // { ok:true, user:{...} }
+    return await res.json();
 }
 
 
