@@ -111,6 +111,19 @@
       align-items:center;
       justify-content:center;
       flex-wrap:wrap;
+      width:100%;
+      padding:6px 12px;
+    }
+    .topbar-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex:1;
+    }
+    .topbar-right{
+      display:flex;
+      align-items:center;
+      gap:12px;
     }
     .topbar-logo{
       width:100px;
@@ -342,32 +355,56 @@
       .podio-card{width:100%;}
     }
 
-
-
-
-    .btn-login-top {
-    background: #e23c3c;
-    padding: 8px 14px;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
+	/* --- Botón Iniciar sesión estilo B --- */
+	.btn-login-top {
+	  background: #e23c3c;
+	  padding: 8px 14px;
+	  color: white;
+	  border: none;
+	  border-radius: 6px;
+	  cursor: pointer;
+	  font-size: 14px;
 	}
-	
-	.btn-login-top:hover {
-	    background: #c83232;
+	.btn-login-top:hover { background: #c83232; }
+
+	/* --- Modal Auth (estilo B) --- */
+	#modalAuth {
+	  position: fixed;
+	  inset:0;
+	  display:none;
+	  align-items:center;
+	  justify-content:center;
+	  background: rgba(0,0,0,0.8);
+	  z-index: 10000;
 	}
-
-
-	  
-
-
-
-    #btnTickets {
-	  display: none !important;
+	.auth-card {
+	  width: 92%;
+	  max-width: 420px;
+	  background: #0b0b0b;
+	  border: 2px solid #e23c3c;
+	  border-radius: 12px;
+	  padding: 18px;
+	  box-shadow: 0 20px 60px #000;
+	  color: #fff;
 	}
-	  
+	.auth-tabs { display:flex; gap:8px; margin-bottom:12px; }
+	.auth-tabs button {
+	  flex:1;
+	  padding:10px;
+	  border-radius:8px;
+	  background:transparent;
+	  color:#fff;
+	  border:1px solid rgba(255,255,255,0.06);
+	  cursor:pointer;
+	}
+	.auth-tabs button.active { background: linear-gradient(90deg,#321313,#4b1212); border-color:#e23c3c; box-shadow:0 8px 30px #e23c3c22; color:#ffdede; }
+	.auth-field { width:100%; padding:12px; margin-top:8px; border-radius:8px; background:#0f0f0f; border:1px solid rgba(255,255,255,0.04); color:#fff; }
+	.auth-submit { margin-top:12px; width:100%; padding:12px; border-radius:8px; border:none; background:#e23c3c; color:#fff; font-weight:700; cursor:pointer; }
+	.auth-close { margin-top:10px; text-align:center; color:#e23c3c; cursor:pointer; font-size:14px; }
+	.small-muted { color:#cfcfcf; font-size:13px; margin-top:8px; }
+
+    #btnTickets { display: none !important; }
+
   </style>
 </head>
 <body>
@@ -393,14 +430,17 @@
     <!-- HEADER / MENU (oculto hasta que termine intro) -->
     <header class="topbar" id="topbar" style="display:none;">
       <div class="topbar-row">
-        <img id="smallLogo" class="topbar-logo" src="" alt="Logo Kovra" />
-        <div class="topbar-title">Kovra — Panel de Comprador</div>
-		<button id="btnLoginTop" class="btn-login-top">Iniciar Sesión</button>
+        <div class="topbar-left">
+          <img id="smallLogo" class="topbar-logo" src="" alt="Logo Kovra" />
+          <div class="topbar-title">Kovra — Panel de Comprador</div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Botón Iniciar Sesión / Mi Cuenta -->
+          <button id="btnLoginTop" class="btn-login-top" type="button">Iniciar Sesión</button>
+        </div>
       </div>
 
-
-
-		
       <div class="menu-buttons" role="toolbar" aria-label="Menú principal">
         <button class="btn" id="btnTickets">Ranking de Tickets</button>
         <button class="btn secondary" id="btnCompradores">Ranking de Compradores</button>
@@ -441,35 +481,53 @@
 			<div id="ganadoresLista" style="width:100%;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;"></div>
 	  </div>
 
-
       <div id="panelPromos" class="panel" aria-hidden="true">
         <div class="gallery" id="gallery"></div>
       </div>
-
-
-
-    
-	 <!-- MODAL IMAGEN -->
-	  <div id="imgModal" class="img-modal" role="dialog" aria-hidden="true">
-	    <div class="img-box">
-	      <button class="close-x" id="closeImgModal" aria-label="Cerrar imagen">X</button>
-	      <img id="modalImg" class="full" src="" alt="Flyer grande" />
-	    </div>
-	  </div>
-
-		
     </main>
   </div>
 
-  
+  <!-- MODAL IMAGEN -->
+  <div id="imgModal" class="img-modal" role="dialog" aria-hidden="true">
+    <div class="img-box">
+      <button class="close-x" id="closeImgModal" aria-label="Cerrar imagen">X</button>
+      <img id="modalImg" class="full" src="" alt="Flyer grande" />
+    </div>
+  </div>
 
+  <!-- AUTH MODAL (Estilo B: Iniciar / Registrar) -->
+  <div id="modalAuth" aria-hidden="true">
+    <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 id="authTitle" style="margin:0;color:#e23c3c">Cuenta Kovra</h3>
+        <div style="font-size:13px;color:#cfcfcf">Inicia sesión para jugar</div>
+      </div>
 
+      <div class="auth-tabs" style="margin-top:12px">
+        <button id="tabLogin" class="active">Iniciar sesión</button>
+        <button id="tabRegister">Registrarse</button>
+      </div>
 
+      <!-- LOGIN FORM -->
+      <div id="authLogin">
+        <input id="loginId" class="auth-field" placeholder="Buzzcast ID (ej. 12345678)" />
+        <input id="loginPass" class="auth-field" type="password" placeholder="Contraseña" />
+        <button id="loginSubmit" class="auth-submit">Entrar</button>
+        <div class="small-muted">Si no tienes cuenta puedes registrarte en la pestaña Registrarse.</div>
+      </div>
 
+      <!-- REGISTER FORM -->
+      <div id="authRegister" style="display:none;">
+        <input id="regId" class="auth-field" placeholder="Buzzcast ID (ej. 12345678)" />
+        <input id="regName" class="auth-field" placeholder="Nombre visible" />
+        <input id="regPass" class="auth-field" type="password" placeholder="Contraseña" />
+        <button id="regSubmit" class="auth-submit">Crear cuenta</button>
+      </div>
 
+      <div class="auth-close" id="closeAuthBtn">Cancelar</div>
+    </div>
+  </div>
 
-	
-	
   <script>
     /**********************
      * CONFIGURACIÓN IMÁGENES (reemplaza por tus URLs)
@@ -539,7 +597,7 @@
 	  {pos:7,id:17921266,nombre:"Anathan_Pham",diamantes:5160},
 	  {pos:8,id:6761817,nombre:"ஜ⃝🦁 ℘ąƈɧɛ ꋬꍌ ꒒ꏂóꋊ",diamantes:3495},
       {pos:9,id:4458251,nombre:"🔥PEPITO DE TODAS",diamantes:2700},
-	  {pos:10,id:19304644,nombre:"☣🍀уσѕнι∂αн🐻‍❄️☢",diamantes:2216},
+	  {pos:10,id:19304644,nombre:"☣🍀уσѕнι∂αҳ🐻‍❄️☢",diamantes:2216},
       {pos:11,id:16381284,nombre:"Luis López 10",diamantes:2200},
 	  {pos:12,id:11689764,nombre:"Lamine Yamal.",diamantes:2000},
 	  {pos:13,id:12385712,nombre:"Hafid'OjiithoOs💕",diamantes:1800},
@@ -566,7 +624,7 @@
 	  { concurso: "Sorteo de los 1000 diamantes", id: 18712178, nombre: "BLACK.DRAGON.", premio: "1000 Diamantes" },
 	 ];
 
-	  
+	  	
     /**********************
      * RENDER TABLAS y GALERÍA
      **********************/
@@ -585,8 +643,6 @@
       });
     }
 	
-	
-
 	// Renderiza los ganadores
 	function renderGanadores() {
 	  const lista = document.getElementById('ganadoresLista');
@@ -604,8 +660,6 @@
 	  });
 	}
 	
-	
-
     /**
      * NUEVO: renderPodioTop
      * Rellena la sección superior con los 3 primeros del rankingDiamantes.
@@ -768,7 +822,6 @@
 	});
 
 
-
     /**********************
      * SECUENCIA INICIAL (control estricto)
      **********************/
@@ -876,61 +929,251 @@
       renderTickets();
       renderDiamantes();
       renderGallery();
+      // actualizar estado del botón top
+      updateTopLoginButton();
     });
 
+  </script>
 
-	// ejecutar condición de loggin
-    document.getElementById("btnLoginTop").addEventListener("click", () => {
-    if (isLogged()) {
-        loadPanel(); // o perfil del usuario
-    } else {
-        loadLogin();
+  <!-- =========================
+       AUTH / SESSIONS (integrado)
+       ========================= -->
+  <script>
+    // Tu Apps Script Web App URL (la que compartiste)
+    const API_URL = "https://script.google.com/macros/s/AKfycbwCpLwlPPpiIWhYfL7_YuQqnSdRd4t2gPUtlc_w2VfptlL5iHdgBK0ZVH94knegfzDj/exec";
+
+    // Hash SHA-256 helper (SubtleCrypto)
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+      return hashHex;
     }
-	});
 
-    // cambia el estado del login
-	if (isLogged()) {
-    document.getElementById("btnLoginTop").textContent = "Mi Cuenta";
-	} 
+    // Comprueba si hay sesión (localStorage)
+    function isLogged() {
+      return !!localStorage.getItem("buzzcast_id");
+    }
 
+    function logoutUser() {
+      localStorage.removeItem("buzzcast_id");
+      updateTopLoginButton();
+      // opcional: volver al panel principal
+      hideAllPanels();
+      renderDiamantes();
+      setTimeout(()=>{ panelCompradores.classList.add('show'); panelCompradores.setAttribute('aria-hidden','false'); }, 40);
+      alert("Sesión cerrada.");
+    }
 
+    // login -> envía id + hash al endpoint
+    async function loginApi(id, passwordPlain) {
+      const pwHash = await hashPassword(passwordPlain);
+      const body = { action: "login", id: id.toString(), password: pwHash };
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        return { ok:false, msg: "Error de red" };
+      }
+    }
 
+    // register -> envía id + nombre + hash
+    async function registerApi(id, nombre, passwordPlain) {
+      const pwHash = await hashPassword(passwordPlain);
+      const body = { action: "register", id: id.toString(), nombre: nombre || "", password: pwHash };
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        return { ok:false, msg: "Error de red" };
+      }
+    }
 
-	// cargamos bloque de juegos
+    // getUserData -> trae info del usuario (puntos, nombre, etc)
+    async function getUserData() {
+      const id = localStorage.getItem("buzzcast_id");
+      if (!id) return null;
+      const body = { action: "getUser", id: id.toString() };
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.ok) return data;
+        return null;
+      } catch (e) {
+        return null;
+      }
+    }
 
-	document.getElementById("btnJuegos")?.addEventListener("click", () => {
+    // UI: abrir/cerrar modal, cambiar pestañas, manejar formularios
+    const modalAuth = document.getElementById('modalAuth');
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
+    const authLogin = document.getElementById('authLogin');
+    const authRegister = document.getElementById('authRegister');
+    const btnLoginTop = document.getElementById('btnLoginTop');
+    const closeAuthBtn = document.getElementById('closeAuthBtn');
 
-    if (!isLogged()) {
-        const confirmLogin = confirm("Debes iniciar sesión para jugar. ¿Quieres iniciar sesión ahora?");
-        if (confirmLogin) {
-            loadLogin();
+    function openAuthModal(showTab = 'login') {
+      modalAuth.style.display = 'flex';
+      modalAuth.setAttribute('aria-hidden','false');
+      if (showTab === 'register') {
+        tabRegister.classList.add('active');
+        tabLogin.classList.remove('active');
+        authRegister.style.display = 'block';
+        authLogin.style.display = 'none';
+      } else {
+        tabLogin.classList.add('active');
+        tabRegister.classList.remove('active');
+        authLogin.style.display = 'block';
+        authRegister.style.display = 'none';
+      }
+    }
+
+    function closeAuthModal() {
+      modalAuth.style.display = 'none';
+      modalAuth.setAttribute('aria-hidden','true');
+      // limpiar campos
+      document.getElementById('loginId').value = "";
+      document.getElementById('loginPass').value = "";
+      document.getElementById('regId').value = "";
+      document.getElementById('regName').value = "";
+      document.getElementById('regPass').value = "";
+    }
+
+    // pestañas
+    tabLogin.addEventListener('click', ()=> openAuthModal('login'));
+    tabRegister.addEventListener('click', ()=> openAuthModal('register'));
+    closeAuthBtn.addEventListener('click', closeAuthModal);
+    modalAuth.addEventListener('click', (e)=> { if (e.target === modalAuth) closeAuthModal(); });
+
+    // acciones: login / register
+    document.getElementById('loginSubmit').addEventListener('click', async ()=>{
+      const id = document.getElementById('loginId').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      if (!id || !pass) { alert("Completa todos los campos"); return; }
+
+      // Llamada a Apps Script
+      const result = await loginApi(id, pass);
+      if (result.ok) {
+        localStorage.setItem("buzzcast_id", id.toString());
+        updateTopLoginButton();
+        closeAuthModal();
+        alert("Inicio de sesión correcto.");
+      } else {
+        alert(result.msg || "Error en credenciales");
+      }
+    });
+
+    document.getElementById('regSubmit').addEventListener('click', async ()=>{
+      const id = document.getElementById('regId').value.trim();
+      const nombre = document.getElementById('regName').value.trim();
+      const pass = document.getElementById('regPass').value;
+      if (!id || !nombre || !pass) { alert("Completa todos los campos"); return; }
+
+      const result = await registerApi(id, nombre, pass);
+      if (result.ok) {
+        localStorage.setItem("buzzcast_id", id.toString());
+        updateTopLoginButton();
+        closeAuthModal();
+        alert("Cuenta creada y sesión iniciada.");
+      } else {
+        alert(result.msg || "Error al registrar");
+      }
+    });
+
+    // Actualiza el texto y acción del botón superior según sesión
+    function updateTopLoginButton() {
+      if (!btnLoginTop) return;
+      if (isLogged()) {
+        btnLoginTop.textContent = "Mi Cuenta";
+        btnLoginTop.onclick = async () => {
+          // Mostrar datos del usuario
+          const u = await getUserData();
+          const nombre = u && u.nombre ? u.nombre : localStorage.getItem('buzzcast_id');
+          const puntos = u && u.puntos != null ? u.puntos : '-';
+          const go = confirm(`Sesión iniciada como: ${nombre}\nPuntos: ${puntos}\n\n¿Quieres cerrar sesión?`);
+          if (go) logoutUser();
+        };
+      } else {
+        btnLoginTop.textContent = "Iniciar Sesión";
+        btnLoginTop.onclick = () => openAuthModal('login');
+      }
+    }
+
+    // Juegos: bloquear si no está logeado
+    document.getElementById("btnJuegos").addEventListener("click", async () => {
+      if (!isLogged()) {
+        // preguntar: iniciar sesión o registrarse
+        const r = confirm("Debes iniciar sesión para acceder a los juegos.\n¿Quieres iniciar sesión ahora? (Cancelar para registrarte)");
+        if (r) {
+          openAuthModal('login');
+        } else {
+          openAuthModal('register');
         }
         return;
+      }
+
+      // si está logeado → cargar sección juegos dentro del contentArea
+      loadGamesPanel();
+    });
+
+    // función que muestra los juegos (dentro del panel, manteniendo estilo)
+    function loadGamesPanel() {
+      hideAllPanels();
+      const panel = document.createElement('div');
+      panel.className = 'panel show';
+      panel.innerHTML = `
+        <div style="width:100%;max-width:1100px;padding:18px;text-align:center;">
+          <h2 style="color:#FFD54A">🎮 Juegos disponibles</h2>
+          <p style="color:#ddd">Selecciona un juego para comenzar.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px;">
+            <button class="btn" id="playRuleta">Ruleta</button>
+            <button class="btn" id="playRasca">Rasca y Gana</button>
+            <button class="btn" id="playDados">Dados</button>
+            <button class="btn secondary" id="backToPanel">Volver al panel</button>
+          </div>
+        </div>
+      `;
+      // añadir panel al contentArea y ocultar los demás
+      const contentArea = document.getElementById('contentArea');
+      contentArea.prepend(panel);
+      // handlers mínimos para botones de juego (puedes extenderlos)
+      document.getElementById('playRuleta').addEventListener('click', ()=> alert('Ruleta: aquí se cargará el juego.'));
+      document.getElementById('playRasca').addEventListener('click', ()=> alert('Rasca y Gana: aquí se cargará el juego.'));
+      document.getElementById('playDados').addEventListener('click', ()=> alert('Dados: aquí se cargará el juego.'));
+      document.getElementById('backToPanel').addEventListener('click', ()=> {
+        panel.remove();
+        // restaurar panel por defecto (compradores)
+        renderDiamantes();
+        hideAllPanels();
+        setTimeout(()=>{ panelCompradores.classList.add('show'); panelCompradores.setAttribute('aria-hidden','false'); }, 40);
+      });
     }
 
-    // Si está logeado → cargar juegos
-    loadGames();
-	});
+    // Si quieres abrir login desde otros lugares en tu app:
+    function loadLogin() { openAuthModal('login'); }
+    function loadRegister() { openAuthModal('register'); }
 
+    // si el usuario ya está logeado al cargar la página, actualizar botón
+    document.addEventListener('DOMContentLoaded', updateTopLoginButton);
 
-   // función que muestra los juegos
-   function loadGames() {
-	    document.getElementById("contentArea").innerHTML = `
-	        <div class="panel show">
-	            <h2>🎮 Juegos disponibles</h2>
-	            <p>Selecciona un juego para comenzar.</p>
-	
-	            <button class="btn">Ruleta</button>
-	            <button class="btn">Rasca y Gana</button>
-	            <button class="btn">Dados</button>
-	        </div>
-	    `;
-	}
-
-
-
-	  
   </script>
+
 </body>
 </html>
-
