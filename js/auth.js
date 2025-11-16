@@ -1,7 +1,9 @@
 // ===============================
 //  CONFIGURACIÓN
 // ===============================
-const API_URL = "https://script.google.com/macros/s/AKfycbyxR7KQKiALTHvutWawU700Ec98EqVyPzfudOZnGB2ouO9f2VTT3dsu6GOx8b-q5Q5U/exec";
+const PROXY = "https://cors.isomorphic-git.org/";
+const API_URL = PROXY + "https://script.google.com/macros/s/AKfycbwgTIsTrcn35MKT-C2xcIEsT1Vwbj8O5ZnyQReLcRvXTyIyZGHYuBqRdOxfRx4cDlC6/exec";
+
 
 
 // ===============================
