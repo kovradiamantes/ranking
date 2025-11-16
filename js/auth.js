@@ -17,14 +17,15 @@ async function hashPassword(password) {
 
 
 // ===============================
-//  REGISTRO
+//  REGISTRO (CLIENTE → SERVIDOR)
 // ===============================
-async function registerUser(id, password) {
+async function registerUser(id, nombre, password) {
     const pwHash = await hashPassword(password);
 
     const body = {
         action: "register",
         id: id,
+        nombre: nombre,
         password: pwHash
     };
 
@@ -34,7 +35,7 @@ async function registerUser(id, password) {
         body: JSON.stringify(body)
     });
 
-    return await res.json();
+    return await res.json(); // {ok:true} o {ok:false,msg:"..."}
 }
 
 
@@ -97,7 +98,7 @@ async function getUserData() {
 
 
 // ===============================
-//  VERIFICAR SESIÓN ACTIVA
+//  VERIFICAR SESIÓN
 // ===============================
 function isLogged() {
     return localStorage.getItem("buzz_user") !== null;
