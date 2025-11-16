@@ -579,54 +579,79 @@
      * Si rankingDiamantes no tiene pos, ordena por diamantes.
      */
     function renderPodioTop(data){
-      const podio = document.getElementById('podioTop');
-      podio.innerHTML = "";
+	  const podio = document.getElementById('podioTop');
+	  podio.innerHTML = "";
+	
+	  // PREMIO FIJO POR DEFECTO (texto plano)
+	  const premiosDefault = ["1000💎", "200💎", "100💎"];
+	
+	  // defensiva: si no hay pos, ordenar por diamantes
+	  const sorted = Array.isArray(data) ? data.slice() : [];
+	  if(sorted.length === 0){
+	    podio.innerHTML = '';
+	    return;
+	  }
+	  if(!('pos' in sorted[0])){
+	    sorted.sort((a,b)=> (b.diamantes||0) - (a.diamantes||0));
+	  } else {
+	    sorted.sort((a,b)=> (a.pos||0) - (b.pos||0));
+	  }
+	
+	  const top3 = sorted.slice(0,3);
+	  const medalClass = ['gold','silver','bronze'];
+	  const labels = ['1º','2º','3º'];
+	
+	  top3.forEach((t,i)=>{
+	    const card = document.createElement('div');
+	    card.className = 'podio-card';
+	
+	    card.innerHTML = `
+	      <div class="medal ${medalClass[i]}" aria-hidden="true">
+	        ${i===0? '🥇' : i===1? '🥈' : '🥉'}
+	      </div>
+	
+	      <div class="podio-info">
+	        <div class="pos">${labels[i]} — #${ t.pos ?? (i+1) }</div>
+	        <div class="name" title="${t.nombre}">${t.nombre}</div>
+	
+	        <div class="meta">
+	          ID: ${t.id} · Compró: ${(t.diamantes || 0).toLocaleString()}💎
+	        </div>
+	
+	        <div class="premio">
+	          Premio: ${premiosDefault[i]}
+	        </div>
+	      </div>
+	    `;
+	    podio.appendChild(card);
+	  });
+	
+	  // Si faltan posiciones, rellenar cards vacíos
+	  for(let k=top3.length;k<3;k++){
+	    const card = document.createElement('div');
+	    card.className = 'podio-card';
+	    card.innerHTML = `
+	      <div class="medal ${medalClass[k]}" aria-hidden="true">
+	        ${k===0? '🥇' : k===1? '🥈' : '🥉'}
+	      </div>
+	
+	      <div class="podio-info">
+	        <div class="pos">${labels[k]} — #${k+1}</div>
+	        <div class="name">Sin participante</div>
+	
+	        <div class="meta">
+	          ID: — · Compró: 0💎
+	        </div>
+	
+	        <div class="premio">
+	          Premio: ${premiosDefault[k]}
+	        </div>
+	      </div>
+	    `;
+	    podio.appendChild(card);
+	  }
+	}
 
-      // defensiva: si no hay pos, ordenar por diamantes
-      const sorted = Array.isArray(data) ? data.slice() : [];
-      if(sorted.length === 0){
-        podio.innerHTML = '';
-        return;
-      }
-      if(!('pos' in sorted[0])){
-        sorted.sort((a,b)=> (b.diamantes||0) - (a.diamantes||0));
-      } else {
-        sorted.sort((a,b)=> (a.pos||0) - (b.pos||0));
-      }
-
-      const top3 = sorted.slice(0,3);
-      const medalClass = ['gold','silver','bronze'];
-      const labels = ['1º','2º','3º'];
-
-      top3.forEach((t,i)=>{
-        const card = document.createElement('div');
-        card.className = 'podio-card';
-        card.innerHTML = `
-          <div class="medal ${medalClass[i]}" aria-hidden="true">${i===0? '🥇' : i===1? '🥈' : '🥉'}</div>
-          <div class="podio-info">
-            <div class="pos">${labels[i]} — #${ t.pos ?? (i+1) }</div>
-            <div class="name" title="${t.nombre}">${t.nombre}</div>
-            <div class="meta">ID: ${t.id} · ${ (t.diamantes || 0).toLocaleString() } ♦</div>
-          </div>
-        `;
-        podio.appendChild(card);
-      });
-
-      // si hay menos de 3, rellenar cards vacíos para mantener layout
-      for(let k=top3.length;k<3;k++){
-        const card = document.createElement('div');
-        card.className = 'podio-card';
-        card.innerHTML = `
-          <div class="medal ${medalClass[k]}" aria-hidden="true">${k===0? '🥇' : k===1? '🥈' : '🥉'}</div>
-          <div class="podio-info">
-            <div class="pos">${labels[k]} — #${k+1}</div>
-            <div class="name">Sin participante</div>
-            <div class="meta">ID: — · 0 ♦</div>
-          </div>
-        `;
-        podio.appendChild(card);
-      }
-    }
 
     function renderDiamantes(){
       // actualizar podio/top3
@@ -849,6 +874,7 @@
   </script>
 </body>
 </html>
+
 
 
 
